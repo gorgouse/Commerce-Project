@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="xmt.item.webapp.dao.AreaDao">
+<!--    查询省    -->
+    <select id="getProvinceList" resultType="xmt.item.webapp.entity.AreaInfo">
+        select
+        area_id province,
+        area_name name
+        from
+        sys_area
+        where
+        parent_id = 0
+    </select>
+<!--    查询城市-->
+    <select id="getCityList" resultType="xmt.item.webapp.entity.AreaInfo">
+        select
+        a.area_id city,
+        a.area_name name
+        from
+        sys_area a,sys_area b
+        where
+        b.parent_id = 0
+        and
+        a.parent_id = b.area_id
+    </select>
+<!--    查询县区域-->
+    <select id="getAreaList" resultType="xmt.item.webapp.entity.AreaInfo">
+        select
+        c.area_id city,
+        c.area_name name
+        from
+        sys_area a, sys_area b ,sys_area c
+        where
+        a.parent_id = 0
+        and
+        b.parent_id = a.area_id
+        and
+        c.parent_id = b.area_id
+    </select>
+<!--  查询子区域  -->
+    <select id="getSubDomain" parameterType="xmt.item.webapp.entity.AreaInfo" resultType="xmt.item.webapp.entity.AreaInfo">
+        select
+        area_id province,
+        area_name name
+        from
+        sys_area
+        where
+        parent_id = #{parentId}
+    </select>
+<!--    查询同名字的id-->
+    <select id="getId" parameterType="java.lang.String" resultType="java.lang.String">
+        select
+        area_id id
+        from
+        sys_area
+        where
+        area_name = #{name}
+    </select>
+</mapper>

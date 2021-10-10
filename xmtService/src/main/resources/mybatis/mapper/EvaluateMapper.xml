@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="xmt.item.webapp.dao.EvaluateDao">
+<!--    新增评价-->
+    <insert id="addEvaluate" parameterType="xmt.item.webapp.entity.EvaluateInfo">
+        insert into
+        sys_evaluate
+        (goods_id,user_id,user_avatar,user_name,order_detail_id,order_detail_desc,evaluate_desc,star_level,create_time)
+        values
+        (#{goodsId},#{userId},#{userAvatar},#{userName},#{orderDetailId},#{orderDetailDesc},#{evaluateDesc},#{starLevel},now())
+    </insert>
+<!--查询商品详情评价-->
+    <select id="selectGoodsDetailEvaluate" parameterType="String" resultType="xmt.item.webapp.entity.EvaluateInfo">
+        select
+        a.id id,a.goods_id goodsId,a.user_avatar userAvatar,a.user_name userName,
+        a.order_detail_id orderDetailId,a.order_detail_desc orderDetailDesc,
+        a.evaluate_desc evaluateDesc,a.star_level starLevel,a.create_time
+        from
+        sys_evaluate a,sys_goods b
+        where
+        a.goods_id = b.id
+        and
+        a.goods_id = #{goodsId}
+    </select>
+<!--    查询商品详情评价总数-->
+    <select id="countGoodsDetailEvaluateTotal" parameterType="String" resultType="Integer">
+        select
+        count(id)
+        from
+        sys_evaluate
+        where
+        goods_id = #{goodsId}
+    </select>
+</mapper>

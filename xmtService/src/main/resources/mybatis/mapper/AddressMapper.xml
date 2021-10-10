@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="xmt.item.webapp.dao.AddressDao">
+<!--    判断是不是第一次收货-->
+    <select id="isFirst" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select
+        count(id)
+        from
+        sys_address
+        where
+        user_id = #{userId}
+    </select>
+<!--    新增收货地址-->
+    <insert id="addAddress" parameterType="xmt.item.webapp.entity.AddressInfo">
+        insert into
+        sys_address
+        (user_id,a_name,a_phone,address,province_id,city_id,area_id,is_default,create_time)
+        values
+        (#{userId},#{name},#{tel},#{addressDetail},#{province},#{city},#{county},#{isDefault},now() )
+    </insert>
+<!--    收货地址列表-->
+    <select id="addressList" parameterType="xmt.item.webapp.entity.AddressInfo" resultType="xmt.item.webapp.entity.AddressInfo">
+        select
+        id id,user_id userId, a_name name,a_phone tel,province_id province,
+        city_id city,area_id county, address address,address addressDetail,is_default isDefault
+        from
+        sys_address
+        where
+        user_id = #{userId}
+    </select>
+<!--    修改收货地址-->
+    <update id="updateAddress" parameterType="xmt.item.webapp.entity.AddressInfo">
+        update
+        sys_address
+        set
+        <if test="name != null and name != ''">
+        a_name = #{name},
+        </if>
+        <if test="tel != null and tel != ''">
+        a_phone = #{tel},
+        </if>
+        <if test="province != null and province != ''">
+        province_id = #{province},
+        </if>
+        <if test="city != null and city != ''">
+        city_id = #{city},
+        </if>
+        <if test="county != null and county != ''">
+        area_id = #{county},
+        </if>
+        <if test="addressDetail != null and addressDetail != ''">
+        address = #{addressDetail},
+        </if>
+        <if test="isDefault != null and isDefault != ''">
+        is_default = #{isDefault},
+        </if>
+        update_time = now()
+        where
+        id = #{id}
+    </update>
+<!--    设置所有默认为空-->
+    <update id="selectDefaultAsFault" parameterType="java.lang.String">
+        update
+        sys_address
+        set
+        is_default = 'false',
+        update_time = now()
+        where
+        user_id = #{userId}
+    </update>
+<!--查询默认-->
+    <select id="selectDefault" parameterType="java.lang.String" resultType="xmt.item.webapp.entity.AddressInfo">
+        select
+        id id,user_id userId, a_name name,a_phone tel,province_id province,
+        city_id city,area_id county, address address,address addressDetail,is_default isDefault
+        from
+        sys_address
+        where
+        user_id = #{userId}
+        and
+        is_default = 'true'
+    </select>
+<!--    根据id查询地址详情-->
+    <select id="selectAddressById" parameterType="java.lang.String" resultType="xmt.item.webapp.entity.AddressInfo">
+        select
+        id id,user_id userId, a_name name,a_phone tel,province_id province,
+        city_id city,area_id county, address address,address addressDetail,is_default isDefault
+        from
+        sys_address
+        where
+        id = #{id}
+    </select>
+</mapper>

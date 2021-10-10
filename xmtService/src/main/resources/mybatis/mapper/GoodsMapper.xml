@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="xmt.item.webapp.dao.GoodsDao">
+
+<!--    搜索商品列表-->
+    <select id="goodsSearch" parameterType="xmt.item.webapp.entity.GoodsInfo" resultType="xmt.item.webapp.entity.GoodsInfo">
+        select
+        id id,
+        g_name gName,
+        g_price gPrice,
+        g_desc gDesc,
+        g_img gImg,
+        g_total gTotal,
+        g_type gType,
+        g_prop gProp,
+        store_id storeId
+        from
+        sys_goods
+        where
+        g_name like concat('%',#{gName},'%')
+        <if test="gDesc != null and gDesc != ''">
+        and
+        g_desc like concat('%',#{gDesc},'%')
+        </if>
+        limit 10
+    </select>
+
+<!--    商品首页显示-->
+    <select id="homeGoodsList" resultType="xmt.item.webapp.entity.GoodsInfo">
+        select
+        id id,g_name gName,g_price gPrice,g_desc gDesc,g_img gImg,g_type gType,g_total gTotal,g_prop gProp,
+        g_sort gSort,store_id storeId
+        from
+        sys_goods
+        where
+        g_state = '3'
+        limit
+        30
+    </select>
+<!--    查询一级分类-->
+    <select id="firstClassify" resultType="xmt.item.webapp.entity.SortInfo">
+        select
+        id id,classify_name text,remark remark
+        from
+        sys_classify
+        where
+        parent_id = 0
+    </select>
+
+<!--    查询二级分类-->
+    <select id="secondClassify" parameterType="java.lang.String" resultType="xmt.item.webapp.entity.SortInfo">
+        select
+        id id,classify_name name,remark remark
+        from
+        sys_classify
+        where
+        parent_id = #{id}
+    </select>
+<!--    查询分类下的商品-->
+    <select id="getGoodsBySort" parameterType="java.lang.String" resultType="xmt.item.webapp.entity.GoodsInfo">
+        select
+        id id,g_name gName,g_img gImg
+        from
+        sys_goods
+        where
+        second_classify = #{secondClassify}
+    </select>
+<!--    点击客服加入聊天-->
+    <select id="addChatByClickClientService" parameterType="String" resultType="xmt.item.webapp.entity.StoreInfo">
+        select
+        b.user_id userId,b.store_name name
+        from
+        sys_goods a,sys_store b
+        where
+        a.store_id = b.id
+        and
+        a.id = #{goodsId}
+    </select>
+<!--查询商品详情-->
+    <select id="selectGoodsById" parameterType="java.lang.String" resultType="xmt.item.webapp.entity.GoodsInfo">
+        select
+        id id,g_name gName,g_price gPrice,g_desc gDesc,g_img gImg,g_total gTotal,g_type gType,g_prop gProp,store_id storeId
+        from
+        sys_goodshomeGoodsList
+        where
+        id = #{id}
+    </select>
+<!--    查询详情图片-->
+    <select id="selectDetailImage" parameterType="String" resultType="xmt.item.webapp.entity.DetailImageInfo">
+        select
+        id id,goods_id goodsId,image image
+        from
+        sys_detail_image
+        where
+        goods_id = #{goodsId}
+    </select>
+<!--    查询商品类型-->
+    <select id="selectTypeOfGoods" parameterType="xmt.item.webapp.entity.TypeInfo" resultType="xmt.item.webapp.entity.TypeInfo">
+        select
+        a.id id,a.g_id gId,a.t_name tName, a.t_img tImg,a.t_price tPrice,a.t_sort tSort
+        from
+        sys_type a,sys_goods b
+        where
+        a.g_id = b.id
+        and
+        a.g_id = #{gId}
+    </select>
+<!--    查询商品属性-->
+    <select id="selectPropOfGoods" parameterType="xmt.item.webapp.entity.PropInfo" resultType="xmt.item.webapp.entity.PropInfo">
+        select
+        id id, g_id gId, p_name pName, sort sort
+        from
+        sys_prop
+        where
+        g_id = #{gId}
+    </select>
+<!--查询商品评价-->
+<!--    <select id=""-->
+</mapper>

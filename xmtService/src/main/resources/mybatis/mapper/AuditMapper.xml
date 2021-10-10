@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="xmt.item.webmanage.dao.AuditDao">
+<!--    1、商品审核模块-->
+<!--    商品审核管理-->
+    <select id="auditGoods" parameterType="xmt.item.webmanage.entity.AuditInfo" resultType="xmt.item.webmanage.entity.AuditInfo">
+        select
+        id goodsId,g_name goodsName,g_price goodsPrice,g_desc goodsDesc,g_state goodsState,g_total goodsTotal,g_img goodsImg,store_id storeId
+        from
+        sys_goods
+        where
+        g_state in ('2','3')
+        <if test="goodsId != null and goodsId != ''">
+            and id like concat('%',#{goodsId},'%')
+        </if>
+
+        <if test="goodsName != null and goodsName != ''">
+            and g_name like concat('%',#{goodsName},'%')
+        </if>
+
+        <if test="goodsDesc != null and goodsDesc != ''">
+            and g_desc like concat('%',#{goodsDesc},'%')
+        </if>
+
+        <if test="goodsState != null and goodsState != ''">
+            and g_state = #{goodsState}
+        </if>
+
+        <if test="storeId != null and storeId != ''">
+            and store_id like concat('%',#{storeId},'%')
+        </if>
+    </select>
+    <!--    修改商品状态:上架或下架-->
+    <update id="auditGoodsUpdate" parameterType="xmt.item.webmanage.entity.CommodityInfo">
+        update
+        sys_goods
+        set
+        g_state = #{goodsState}
+        where
+        id = #{goodsId}
+    </update>
+<!--店铺注册审核管理-->
+<!--    新增店铺审核-->
+    <select id="auditStoreRegister" parameterType="xmt.item.webmanage.entity.AuditInfo">
+        insert into sys_audit
+        (nickname,phone,email,license_type,license_acct,license_address,create_time,store_name,store_img,img,username,password)
+        values
+        (#{shopManager},#{phone},#{email},#{licenseType},#{licenseAcct},#{licenseAddress},#{bornDate},#{storeName},#{storeImg},#{img},#{username},#{password})
+    </select>
+<!--    店铺审核通过-->
+    <!-- 1、注册店长-->
+    <insert id="storeManageRegister" parameterType="xmt.item.webmanage.entity.PersonalMsgInfo">
+        insert into
+        sys_admin
+        (id,username,password,nickname,idcard,email,phone,img,role,create_time)
+        values
+        (#{userId},#{acct},#{password},#{shopManageName},#{idCard},#{email},#{phone},#{img},3,Date(now()) )
+    </insert>
+    <!---2、注册店铺-->
+    <insert id="storeRegister" parameterType="xmt.item.webmanage.entity.StoreMessage">
+        insert into
+        sys_store
+        (store_name,user_id,store_img,fans_number,score,license_address,license_acct,license_type,create_time)
+        values
+        (#{storeName},#{userId},#{storeImg},0,0,#{licenseAddress},#{licenseAcct},#{licenseType},#{createTime})
+    </insert>
+    <!--3-1、删除审核表中的数据--><!--    3-2审核不通过-->
+    <delete id="deleteAuditOfStoreRegister" parameterType="xmt.item.webmanage.entity.AuditInfo">
+        delete from
+        sys_audit
+        where
+        id = #{auditId}
+    </delete>
+
+<!--    查询店铺审核-->
+    <select id="selectAuditStoreRegister" parameterType="xmt.item.webmanage.entity.AuditInfo" resultType="xmt.item.webmanage.entity.AuditInfo">
+        select
+        id id,nickname shopManager,phone phone,license_type licenseType,license_acct licenseAcct,license_address licenseAddress,
+        create_time bornDate,store_name storeName,username username,password password,idcard idCard,email email,img img,store_img storeImg
+        from
+        sys_audit
+        order by
+        create_time
+        desc
+        limit 5
+    </select>
+
+    <!--    轮播图审核模块-->
+    <!--    轮播图审核新增-->
+    <insert id="auditSlideAdd" parameterType="xmt.item.webmanage.entity.RegisterManageInfo">
+        insert into
+        sys_audit_slide
+        (goods_id,img)
+        values
+        (#{goodsId},#{slideImg})
+    </insert>
+    <!--    轮播图审核查询-->
+    <select id="auditSlideSelect" parameterType="xmt.item.webmanage.entity.RegisterManageInfo" resultType="xmt.item.webmanage.entity.RegisterManageInfo">
+        select
+        a.id id,a.img slideImg,a.goods_id goodsId,b.g_name goodsName,c.store_name storeName,c.license_type licenseType,c.license_address licenseAddress
+        from
+        sys_audit_slide a,sys_goods b,sys_store c
+        where
+        a.goods_id = b.id
+        and
+        b.store_id = c.id
+    </select>
+    <!--    轮播图审核通过-->
+<!--    新增轮播图-->
+    <insert id="addSlide" parameterType="xmt.item.webmanage.entity.CarouselInfo">
+        insert into
+        sys_slide
+        (g_id,img,slide_state,create_time)
+        values
+        (#{goodsId},#{carousel},'3',now())
+    </insert>
+
+    <!--    轮播图审核删除-->
+    <delete id="auditSlideDelete" parameterType="String">
+        delete from
+        sys_audit_slide
+        where
+        goods_id = #{goodsId}
+    </delete>
+</mapper>

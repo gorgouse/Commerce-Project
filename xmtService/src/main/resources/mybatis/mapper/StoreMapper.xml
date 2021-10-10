@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="xmt.item.webapp.dao.StoreDao">
+<!--    查询通过商品编号查询店铺编号-->
+    <select id="getStoreIdByGoodsId" parameterType="String" resultType="java.lang.String">
+        select
+        store_id storeId
+        from
+        sys_goods
+        where
+        id = #{goodsId}
+    </select>
+<!--    查询店铺详情-->
+    <select id="selectStore" parameterType="xmt.item.webapp.entity.StoreInfo" resultType="xmt.item.webapp.entity.StoreInfo">
+        select
+        id id,store_name name,user_id userId,fans_number fansNumber,score score
+        from
+        sys_store
+        where
+        id = #{id}
+    </select>
+<!--    查询店铺的商品-->
+    <select id="selectStoreGoods" parameterType="xmt.item.webapp.entity.StoreInfo" resultType="xmt.item.webapp.entity.StoreInfo">
+        select
+        b.id id,b.g_name gName,b.g_price gPrice,b.g_desc gDesc,b.g_img gImg,
+        b.g_total gTotal,b.g_type gType,b.g_prop gProp
+        from
+        sys_store a,sys_goods b
+        where
+        a.id = b.store_id
+        and
+        a.id = #{storeId}
+        order by
+        a.create_time
+        desc
+    </select>
+</mapper>

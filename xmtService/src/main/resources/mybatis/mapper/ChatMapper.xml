@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="xmt.item.chat.ChatDao">
+<!--    新增聊天-->
+    <insert id="addChat" parameterType="xmt.item.chat.ChatInfo">
+        insert into
+        sys_chat
+        (from_user,to_user,msg,create_time)
+        values
+        (#{fromUserId},#{toUserId},#{msg},now())
+    </insert>
+<!--    查找列表-->
+<select id="userChatList" parameterType="xmt.item.chat.ChatInfo" resultType="xmt.item.chat.ChatInfo">
+   SELECT DISTINCT
+	id userId,
+	nickname name,
+	img img
+FROM
+	sys_user
+WHERE
+	id IN (
+		SELECT
+			user_id
+		FROM
+			(
+				SELECT
+					to_user AS user_id,
+					create_time
+				FROM
+					sys_chat
+				WHERE
+					from_user = #{userId}
+				UNION
+					SELECT
+						from_user AS user_id,
+						create_time
+					FROM
+						sys_chat
+					WHERE
+						to_user = #{userId}
+			) temp
+		ORDER BY
+			temp.create_time asc
+	)
+</select>
+<!--	查找聊天记录-->
+	<select id="selectChatRecord" parameterType="xmt.item.chat.ChatInfo" resultType="xmt.item.chat.ChatInfo">
+	SELECT
+	*
+FROM
+	(
+		SELECT
+			a.from_user fromUserId,
+			a.to_user toUserId,
+			a.msg,
+			a.create_time,
+			b.nickname name
+		FROM
+			sys_chat a,
+			sys_user b
+		WHERE
+			a.from_user = b.id
+		AND from_user = #{fromUserId}
+		AND to_user = #{toUserId}
+		UNION
+			SELECT
+				a.from_user fromUserId,
+				a.to_user toUserId,
+				a.msg,
+				a.create_time,
+				b.nickname name
+			FROM
+				sys_chat a,
+				sys_user b
+			WHERE
+				a.from_user = b.id
+			AND from_user = #{toUserId}
+			AND to_user = #{fromUserId}
+	) temp
+ORDER BY
+	temp.create_time ASC
+	</select>
+</mapper>

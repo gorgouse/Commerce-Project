@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="xmt.item.webmanage.dao.AdminDao">
+<!--    新增访问量-->
+    <update id="addPageView">
+        update
+        sys_page_view
+        set
+        page_view = page_view + 1
+    </update>
+<!--    访问量-->
+    <select id="countPageViewNumber" resultType="xmt.item.webmanage.entity.NumberInfo">
+        select
+        page_view pageViewNumber
+        from
+        sys_page_view
+    </select>
+<!--    查询客户数量-->
+    <select id="countClientNumber" resultType="xmt.item.webmanage.entity.NumberInfo">
+        SELECT
+            count(id) AS 'clientNumber'
+        FROM
+            sys_user
+        WHERE
+            role = '4'
+    </select>
+<!--    查询下单数量-->
+    <select id="countOrderNumber" resultType="xmt.item.webmanage.entity.NumberInfo">
+        select
+        count(id) as 'orderNumber'
+        from
+        sys_order
+    </select>
+<!--    管理者登录-->
+    <select id="loginAdmin" parameterType="xmt.item.webmanage.entity.AdminInfo" resultType="xmt.item.webmanage.entity.AdminInfo">
+        select
+        id id,username username,password password,nickname nickname,phone phone,img img,role role,idcard idcard
+        from
+        sys_admin
+        where
+        username = #{username}
+    </select>
+<!--    店长登录-->
+    <select id="loginStore" parameterType="xmt.item.webmanage.entity.AdminInfo" resultType="xmt.item.webmanage.entity.AdminInfo">
+        select
+        id id,username username,password password,nickname nickname,phone phone,img img,role role,idcard idcard
+        from
+        sys_user
+        where
+        username = #{username}
+    </select>
+    <!--    查询管理员-->
+    <select id="selectAdmin" parameterType="xmt.item.webmanage.entity.AdminInfo" resultType="xmt.item.webmanage.entity.AdminInfo">
+        select
+        id id,username username,password password,nickname nickname,phone phone,img img,role role,idcard idcard,create_time createTime
+        from
+        sys_admin
+        where
+        role in ('1','2')
+    </select>
+    <!--    查询店长/分页查询-->
+    <select id="selectStoreManage" parameterType="xmt.item.webmanage.entity.AdminInfo" resultType="xmt.item.webmanage.entity.AdminInfo">
+        select
+        id id,username username,password password,nickname shopManagerName,phone phone,img img,role role,idcard idcard,create_time createTime
+        from
+        sys_user
+        where
+        role = '3'
+        <if test="id != null and id != ''">
+            and id like concat('%',#{id},'%')
+        </if>
+        <if test="shopManagerName != null and shopManagerName != ''">
+            and nickname like concat('%',#{shopManagerName},'%')
+        </if>
+        <if test="phone != null and phone != ''">
+            and phone like concat('%',#{phone},'%')
+        </if>
+        <if test="idcard != null and idcard != ''">
+            and idcard like concat('%',#{idcard},'%')
+        </if>
+    </select>
+<!--    查询账号是否存在,存在查出来密码,多次用接口-->
+    <select id="exitAccount" parameterType="String" resultType="xmt.item.webmanage.entity.AdminInfo">
+        select
+        username,password
+        from
+        sys_admin
+        where
+        username = #{username}
+    </select>
+
+    <!--    新增管理员-->
+    <insert id="addAdmin" parameterType="xmt.item.webmanage.entity.AdminInfo">
+        insert into sys_admin
+        (id,username,password,nickname,idcard,email,phone,img,role,create_time,update_time)
+        values
+        (#{id},#{username},#{password},#{adminName},#{idcard},#{email},#{phone},#{img},#{role},now(),now())
+    </insert>
+<!--    修改管理员-->
+    <update id="updateAdmin" parameterType="xmt.item.webmanage.entity.AdminInfo">
+        update
+        sys_admin
+        set
+        <if test="username!= null and username != ''">
+        username = #{username},
+        </if>
+        <if test="password!= null and password != ''">
+        password = #{password},
+        </if>
+        <if test="adminName!= null and adminName != ''">
+        nickname = #{adminName},
+        </if>
+        <if test="idcard!= null and idcard != ''">
+        idcard = #{idcard},
+        </if>
+        <if test="email!= null and email != ''">
+        email = #{email},
+        </if>
+        <if test="phone!= null and phone != ''">
+            phone = #{phone},
+        </if>
+        <if test="img!= null and img != ''">
+        img = #{img},
+        </if>
+        update_time = now()
+        where
+        id = #{id}
+    </update>
+<!--    删除管理员-->
+    <delete id="deleteAdmin" parameterType="String">
+        delete
+        from
+        sys_admin
+        where
+        id =#{adminId}
+    </delete>
+</mapper>

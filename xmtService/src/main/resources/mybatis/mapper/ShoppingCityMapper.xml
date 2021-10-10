@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="xmt.item.webmanage.dao.ShoppingCityDao">
+<!--    商城管理分类模块-->
+<!--    查询一级分类-->
+    <select id="getFirstSort" resultType="xmt.item.webmanage.entity.FirstClassifyInfo">
+        select
+        id id,classify_name label,parent_id parentId,remark remark
+        from
+        sys_classify
+        where
+        parent_id = 0
+    </select>
+<!--    查询二级分类-->
+    <select id="getSecondSort" parameterType="java.lang.Integer" resultType="xmt.item.webmanage.entity.SecondClassifyInfo">
+        select
+        id id,classify_name label,parent_id parentId,remark remark
+        from
+        sys_classify
+        where
+        parent_id = #{id}
+    </select>
+<!--    新增分类-->
+    <insert id="addClassify" parameterType="xmt.item.webmanage.entity.ClassifyInfo">
+        insert into
+        sys_classify
+        (classify_name,parent_id,create_time,remark)
+        values
+        (#{classifyName},#{parentId},now(),remark)
+    </insert>
+<!--    修改分类-->
+    <update id="updateClassify" parameterType="xmt.item.webmanage.entity.ClassifyInfo">
+        update
+        sys_classify
+        set
+        update_time = date(now())
+        <if test="classifyName != '' and classifyName != null">
+        ,classify_name = #{classifyName}
+        </if>
+        <if test="remark != '' and remark != null">
+        ,remark = #{remark}
+        </if>
+        where
+        id = #{id}
+    </update>
+<!--    判断是否有子分类-->
+    <select id="hasSubClassify" parameterType="java.lang.String" resultType="xmt.item.webmanage.entity.ClassifyInfo">
+        select
+        id
+        from
+        sys_classify
+        where
+        parent_id = #{id}
+    </select>
+<!--    删除分类-->
+    <delete id="deleteClassify" parameterType="java.lang.String">
+        delete from
+        sys_classify
+        where
+        id = #{id}
+    </delete>
+
+<!--    商城管理订单模块-->
+<!--    查询订单-->
+    <select id="selectOrder" parameterType="xmt.item.webmanage.entity.OrderManageInfo" resultType="xmt.item.webmanage.entity.OrderManageInfo">
+        select
+        b.nickname nickname,b.phone phone,a.id id,a.user_id userId,a.total_price totalPrice,a.all_count allCount,a.create_time createTime
+--         ,a.order_id orderId,a.g_id goodsId,a.g_name goodsName,a.g_desc goodsDesc,g_img goodsImg,g_price goodsPrice
+        from
+        sys_order a,sys_user b
+        where
+        a.user_id = b.id
+        <if test="state != null and state != ''">
+        and
+        state = #{state}
+        </if>
+    </select>
+<!--    商城管理客户管理模块-->
+<!--    查询客户-->
+    <select id="selectClient" parameterType="xmt.item.webmanage.entity.ClientInfo" resultType="xmt.item.webmanage.entity.ClientInfo">
+        select
+        id id,username username,nickname nickname,phone phone,sex sex,create_time createTime,
+        img img
+        from
+        sys_user
+        where
+        role = '4'
+    </select>
+</mapper>

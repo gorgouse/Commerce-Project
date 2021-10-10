@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="xmt.item.webapp.dao.SlideDao">
+<!--    首页轮播图列表-->
+    <select id="slideList" resultType="xmt.item.webapp.entity.SlideInfo">
+        select
+        id id,
+        g_id gId,
+        img img,
+        sort sort
+        from
+        sys_slide
+        where
+        slide_state = '3'
+        order by
+        sort
+        desc
+    </select>
+</mapper>

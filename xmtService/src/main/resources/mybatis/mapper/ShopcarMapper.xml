@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+        <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="xmt.item.webapp.dao.ShopcarDao">
+
+<!--        加入购物车-->
+ <insert id="addShopCar" parameterType="xmt.item.webapp.entity.ShopInfo">
+    insert into
+    sys_shopcar
+    (goods_id,user_id,total,create_time,s_desc)
+    values
+    (#{goodsId},#{userId},#{total},date(now()),#{sDesc})
+ </insert>
+<!--    修改购物车-->
+<update id="updateShopCar" parameterType="xmt.item.webapp.entity.ShopInfo">
+    update
+    sys_shopcar
+    set
+    total = #{total},
+    update_time = date(now())
+</update>
+<!--    查询购物车列表中是否已有该商品-->
+ <select id="hasGoodsIdInShopCar" parameterType="xmt.item.webapp.entity.ShopInfo" resultType="xmt.item.webapp.entity.ShopInfo">
+     select
+     id id,total total
+     from
+     sys_shopcar
+     where
+     goods_id = #{goodsId}
+ </select>
+<!--        购物车列表-->
+ <select id="listUserShopCar" parameterType="xmt.item.webapp.entity.ShopInfo" resultType="xmt.item.webapp.entity.ShopInfo">
+     select
+     a.id id,
+     a.total total,
+     a.s_desc sDesc,
+     a.create_time createTime,
+     b.id gId,
+     b.g_name gName,
+     b.g_price gPrice,
+     b.g_desc gDesc,
+     b.g_img gImg
+     from
+     sys_shopcar a,
+     sys_goods b,
+     sys_user c
+     where
+     a.user_id = #{userId}
+     and
+     a.goods_id = b.id
+     and
+     a.user_id = c.id
+ </select>
+<!--    删除购物车-->
+    <delete id="deleteShopCar" parameterType="java.util.List">
+        delete from
+        sys_shopcar
+        where
+        id
+        in
+        <foreach collection="shopCardIdList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+</mapper>

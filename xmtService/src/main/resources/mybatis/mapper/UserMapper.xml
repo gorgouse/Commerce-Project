@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="xmt.item.webapp.dao.UserDao">
+<!--    APP-->
+    <!--    新增访问量-->
+    <update id="addPageView">
+        update
+        sys_page_view
+        set
+        page_view = page_view + 1
+    </update>
+<!--查找是否已有账号或手机号-->
+    <select id="hasAlreadyAcctAndPhone" parameterType="xmt.item.webapp.entity.UserInfo" resultType="java.lang.Integer">
+        select
+        count(id)
+        from
+        sys_user
+        where
+        <if test="username != null and username != ''">
+            username = #{username}
+        </if>
+        <if test="phone != null and phone != ''">
+            phone = #{phone}
+        </if>
+    </select>
+<!--    注册-->
+    <insert id="register" parameterType="xmt.item.webapp.entity.UserInfo">
+        insert into
+        sys_user
+        (id,username,password,nickname,phone,sex,img,create_time,update_time,idcard,email,role)
+        values
+        (#{id},#{username},#{password},#{nickname},#{phone},'3',#{img},NOW(),now(),#{idCard},#{email},'4')
+    </insert>
+<!--    登录-->
+   <select id="clientLogin" parameterType="xmt.item.webapp.entity.UserInfo" resultType="xmt.item.webapp.entity.UserInfo">
+        select
+        id id,
+        nickname nickname,
+        username username,
+        password password,
+        phone phone,
+        sex sex,
+        img img
+        from
+        sys_user
+        where
+        username = #{username}
+    </select>
+<!--    查询用户详情-->
+    <select id="getDetail" parameterType="xmt.item.webapp.entity.UserInfo" resultType="xmt.item.webapp.entity.UserInfo">
+        select
+        id id,username username,nickname nickname,phone phone,sex sex,img img
+        from
+        sys_user
+        where
+        id = #{id}
+    </select>
+</mapper>

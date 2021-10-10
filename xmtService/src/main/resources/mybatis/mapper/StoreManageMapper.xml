@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="xmt.item.webmanage.dao.StoreManageDao">
+<!--    店铺管理-->
+<!--查询一级分类-->
+    <select id="getFirstClassify" parameterType="xmt.item.webmanage.entity.ClassifyInfo" resultType="xmt.item.webmanage.entity.ClassifyInfo">
+        select
+        id id,classify_name classifyName
+        from
+        sys_classify
+        where
+        parent_id = 0
+    </select>
+<!--    查询二级分类-->
+    <select id="getSecondClassify" parameterType="String" resultType="xmt.item.webmanage.entity.ClassifyInfo">
+        select
+        id id,classify_name classifyName
+        from
+        sys_classify
+        where
+        parent_id = #{classifyId}
+    </select>
+<!--    查询二级分类-->
+<!--    1、商品管理模块-->
+<!--    1-1商品查询-->
+    <select id="goodsManageSelect" parameterType="xmt.item.webmanage.entity.CommodityInfo" resultType="xmt.item.webmanage.entity.CommodityInfo">
+    SELECT
+	a.id goodsId,
+	a.g_name goodsName,
+	a.g_price goodsPrice,
+	a.g_desc goodsDesc,
+	a.g_type goodsType,
+	a.g_prop goodsProp,
+	a.g_state goodsState,
+	a.g_total goodsTotal,
+	a.g_img goodsImg,
+	a.create_time createTime,
+	a.g_sort goodsSort,
+	a.slide_state slideState,
+	c.classify_name firstClassifyName,
+	d.classify_name secondClassifyName
+FROM
+	sys_goods a,
+	sys_store b,
+	sys_classify c,
+	sys_classify d
+WHERE
+	a.store_id = b.id
+AND b.user_id =  #{shopManageId}
+AND a.first_classify = c.id
+AND a.second_classify = d.id
+ORDER BY
+	a.create_time DESC
+    </select>
+
+<!--    新增商品类型-->
+    <insert id="addType" parameterType="xmt.item.webmanage.entity.TypeInfo">
+        insert into
+        sys_type
+        (g_id,t_name,t_img,t_price,t_sort,create_time,update_time)
+        values
+        (#{gId},#{tName},#{tImg},#{tPrice},#{tSort},now(),now())
+    </insert>
+
+<!--    新增商品属性-->
+    <insert id="addProp" parameterType="xmt.item.webmanage.entity.PropInfo">
+        insert into
+        sys_prop
+        (g_id,p_name,sort,create_time,update_time)
+        values
+        (#{gId},#{pName},#{sort},now(),now())
+    </insert>
+
+<!--    1-2商品新增-->
+    <insert id="addGoods" parameterType="xmt.item.webmanage.entity.CommodityInfo">
+    insert into
+    sys_goods
+    (g_name,g_price,g_state,g_total,g_type,g_img,g_sort,g_prop,store_id,g_desc,create_time,update_time,slide_state,first_classify,second_classify)
+    values
+    (#{goodsName},#{goodsPrice},1,#{goodsTotal},#{goodsType},#{goodsImg},#{goodsSort},#{goodsProp},#{storeId},#{goodsDesc},now(),now(),1,#{firstClassify},#{secondClassify})
+    </insert>
+<!--    1-2发布、1-3下架商品-->
+<!--    在AuditMapper.xml的修改商品状态-->
+<!--    1-3修改商品-->
+    <update id="updateGoods" parameterType="xmt.item.webmanage.entity.CommodityInfo">
+        update
+        sys_goods
+        set
+        <if test="goodsName != null and goodsName != ''">
+            g_name = #{goodsName},
+        </if>
+        <if test="goodsPrice != null and goodsPrice != ''">
+            g_price = #{goodsPrice},
+        </if>
+        <if test="goodsTotal != null and goodsTotal != ''">
+            g_total = #{goodsTotal},
+        </if>
+        <if test="goodsType != null and goodsType != ''">
+            g_type = #{goodsType},
+        </if>
+        <if test="goodsImg != null and goodsImg != ''">
+            g_img = #{goodsImg},
+        </if>
+        <if test="goodsSort != null and goodsSort != ''">
+            g_sort = #{goodsSort},
+        </if>
+        <if test="goodsProp != null and goodsProp != ''">
+            g_prop = #{goodsProp},
+        </if>
+        update_time = now()
+        where
+        id = #{goodsId}
+    </update>
+<!--    1-4删除商品-->
+    <delete id="deleteGoods" parameterType="xmt.item.webmanage.entity.CommodityInfo">
+        delete from
+        sys_goods
+        where
+        id = #{goodsId}
+    </delete>
+<!--    2、店铺订单模块-->
+<!--    2-1查询店铺总订单-->
+    <select id="selectMainOrderOfStore" parameterType="String" resultType="xmt.item.webapp.entity.OrderInfo">
+        select
+        a.id id,a.address_id addressId,a.total_price totalPrice,a.all_count allCount,a.state state,a.create_time createTime,
+        c.user_id userId,c.a_name clientName,c.a_phone phone,d.area_name,e.area_name,f.area_name, c.address address
+        from
+        sys_order a,sys_store b,sys_address c,sys_area d,sys_area e,sys_area f
+        where
+        a.store_id = b.id
+        and
+        b.user_id = #{shopManageId}
+        and
+        a.address_id = c.id
+        and
+        c.province_id = d.area_id
+        and
+        c.city_id = e.area_id
+        and
+        c.area_id = f.area_id
+        and
+        a.state != '1'
+        and
+        a.state != '5'
+        order by
+        a.create_time
+        desc
+    </select>
+<!--    2-2店铺订单详情查询-->
+    <select id="storeOrderDetail" parameterType="xmt.item.webmanage.entity.StoreOrderDetail" resultType="xmt.item.webmanage.entity.StoreOrderDetail">
+        select a.id id,a.order_id orderId,a.g_id goodsId,a.g_name goodsName,a.g_desc goodsDesc,a.g_img goodsImg,
+        g_count goodsCount,a.g_price goodsPrice,a.create_time createTime
+        from
+        sys_order_detail a,sys_order b,sys_goods d,sys_store e
+        where
+        a.order_id = b.id
+        and
+        a.g_id = d.id
+        and
+        d.store_id = e.id
+        and
+        e.user_id = #{shopManageId}
+        and
+        a.order_id = #{orderId}
+    </select>
+
+<!--    3、店铺信息模块-->
+<!--    3-1店铺信息查询-->
+    <select id="storeMessageSelect" parameterType="xmt.item.webmanage.entity.StoreMessage" resultType="xmt.item.webmanage.entity.StoreMessage">
+        select
+        a.id id,a.store_name storeName,a.user_id userId,a.store_img storeImg,
+        a.fans_number fansNumber,a.score score,a.license_address licenseAddress,
+        a.license_acct licenseAcct,a.license_type licenseType,a.create_time createTime,
+        b.nickname shopName
+        from
+        sys_store a,sys_user b
+        where
+        a.user_id = b.id
+        and
+        user_id = #{shopManageId}
+    </select>
+<!--    3-2修改店铺信息-->
+    <update id="updateStore" parameterType="xmt.item.webmanage.entity.StoreMessage">
+        update
+        sys_store
+        set
+        <if test="storeName != null and storeName != ''">
+        store_name = #{storeName}
+        </if>
+        <if test="licenseAddress != null and licenseAddress != ''">
+        store_img = #{storeImg}
+        </if>
+        <if test="licenseAcct != null and licenseAcct != ''">
+        license_acct = #{licenseAcct}
+        </if>
+        <if test="licenseType != null and licenseType != ''">
+        license_type = #{licenseType}
+        </if>
+        <if test="storeImg != null and storeImg != ''">
+        store_img = #{storeImg}
+        </if>
+        <if test="updateTime == ''">
+        update_time = date(now())
+        </if>
+        where
+        id = #{id}
+    </update>
+<!--    4、轮播申请模块-->
+<!--轮播申请-->
+    <insert id="slideApply" parameterType="xmt.item.webmanage.entity.CarouselInfo">
+        insert into
+        sys_audit_slide
+        (goods_id,img,create_time)
+        values
+        (#{goodsId},#{carousel},date(now()))
+    </insert>
+<!--    修改商品轮播图状态-->
+    <update id="updateGoodsSlide" parameterType="xmt.item.webmanage.entity.CarouselInfo">
+        update
+        sys_goods
+        set
+        slide_state = #{slideState}
+        where
+        id = #{goodsId}
+    </update>
+    
+<!--    5、个人信息模块-->
+<!--   5-1个人信息查询-->
+    <select id="personalSelect" parameterType="xmt.item.webmanage.entity.PersonalMsgInfo" resultType="xmt.item.webmanage.entity.PersonalMsgInfo">
+        select
+        id userId,username acct,nickname shopManageName,idcard idCard,phone phone,email email,
+        img img
+        from
+        sys_admin
+        where
+        id = #{userId}
+    </select>
+<!--    查询店长信息-->
+    <select id="storePersonalSelect" parameterType="xmt.item.webmanage.entity.PersonalMsgInfo" resultType="xmt.item.webmanage.entity.PersonalMsgInfo">
+        select
+        id userId,username acct,nickname shopManageName,idcard idCard,phone phone,email email,
+        img img
+        from
+        sys_user
+        where
+        id = #{userId}
+    </select>
+
+<!--    5-2修改个人信息-->
+<!--    //店长-->
+    <update id="updateStorePersonal" parameterType="xmt.item.webmanage.entity.PersonalMsgInfo">
+        update
+        sys_user
+        set
+        <if test="shopManageName != null and shopManageName != ''">
+            nickname = #{shopManageName}
+        </if>
+        <if test="idCard != null and idCard != ''">
+            idcard = #{idCard}
+        </if>
+        <if test="phone != null and phone != ''">
+            phone = #{phone}
+        </if>
+        <if test="email != null and email != ''">
+            email = #{email}
+        </if>
+        <if test="img != null and img != ''">
+            img = #{img}
+        </if>
+        where
+        id = #{shopManageId}
+    </update>
+
+    <update id="updatePersonal" parameterType="xmt.item.webmanage.entity.PersonalMsgInfo">
+        update
+        sys_admin
+        set
+        <if test="shopManageName != null and shopManageName != ''">
+            nickname = #{shopManageName}
+        </if>
+        <if test="idCard != null and idCard != ''">
+            idcard = #{idCard}
+        </if>
+        <if test="phone != null and phone != ''">
+            phone = #{phone}
+        </if>
+        <if test="email != null and email != ''">
+            email = #{email}
+        </if>
+        <if test="img != null and img != ''">
+            img = #{img}
+        </if>
+        where
+        id = #{shopManageId}
+    </update>
+</mapper>
